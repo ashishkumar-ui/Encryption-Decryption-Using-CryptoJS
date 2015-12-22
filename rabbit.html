@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Encryption Test</title>
+	<style type="text/css">
+	i{color: red; text-shadow: 1px 1px 1px #CCC;}
+	</style>
+</head>
+<body>
+	
+	<input id="passphrase" placeholder="Passphrase" />
+	<br />
+	<br />
+	<input id="input-encryption" /><button id="btn-encrypt">Encrypt</button>
+	<br /> Encrypted: <i id="encrypted-output"></i> 
+	<br /> Encrypted + Encoded: <i id="encrypted-output-decoded"></i>
+	<br />
+	<br />
+	<!-- input id="input-decryption" / --><button id="btn-decrypt">Decrypt Encoded String</button>
+	<br />
+	<i id="decrypted-output"></i>
+	
+	<script src="js/rabbit.js"></script>
+	<script>
+	(function(CryptoJS){
+		var utils = {
+			getElm: function(elm){
+				return document.getElementById(elm);
+			},
+			decryptedToString : function (decrypted) {
+				var chars = [],
+				decryptedArr = decrypted.toString().split('');
+				while (decryptedArr.length !== 0) {
+					chars.push(String.fromCharCode(parseInt(decryptedArr.splice(0, 2).join(''), 16)));
+				}
+				return chars.join('');
+			},
+			encrypt: function(inputString, passphrase){
+				return CryptoJS.Rabbit.encrypt(inputString, passphrase);
+			},
+			decrypt: function(encryptedString, passphrase){
+				var decripted = CryptoJS.Rabbit.decrypt(encryptedString, passphrase);
+
+				return utils.decryptedToString(decripted);
+			}
+		};
+
+		// Elements
+		var $elms = {
+			passphrase: utils.getElm("passphrase"),
+			btnEncrypt: utils.getElm("btn-encrypt"),
+			btnDecrypt: utils.getElm("btn-decrypt"),
+			inputEncrypt: utils.getElm("input-encryption"),
+			inputDecrypt: utils.getElm("input-decryption"),
+			encrypted: utils.getElm("encrypted-output"),
+			decrypted: utils.getElm("decrypted-output"),
+			encryptedEncoded: utils.getElm("encrypted-output-decoded")
+		};
+
+		// Event Bindings
+		$elms.btnEncrypt.onclick = function(){
+			var inputString = $elms.inputEncrypt.value,
+				passphrase = $elms.passphrase.value,
+				encoded = utils.encrypt(inputString, passphrase);
+
+			$elms.encrypted.innerHTML = encoded;
+			$elms.encryptedEncoded.innerHTML = encodeURIComponent(encoded);
+			//$elms.inputDecrypt.value = encoded;
+		};
+
+		$elms.btnDecrypt.onclick = function(){
+			var inputString = decodeURIComponent($elms.encryptedEncoded.innerHTML), //$elms.inputDecrypt.value,
+				passphrase = $elms.passphrase.value;
+
+			$elms.decrypted.innerHTML = utils.decrypt(inputString, passphrase);
+		};
+
+	})(CryptoJS);
+	</script>
+</body>
+</html>
